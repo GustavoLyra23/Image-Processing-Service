@@ -1,7 +1,7 @@
 package org.gustavolyra.image_process_service.controller;
 
-import org.gustavolyra.image_process_service.models.dto.AuthResponseDto;
-import org.gustavolyra.image_process_service.models.dto.UserDataDto;
+import org.gustavolyra.image_process_service.models.dto.auth.AuthResponseDto;
+import org.gustavolyra.image_process_service.models.dto.auth.UserDataDto;
 import org.gustavolyra.image_process_service.services.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

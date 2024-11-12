@@ -1,4 +1,4 @@
-package org.gustavolyra.image_process_service.models.dto;
+package org.gustavolyra.image_process_service.models.dto.auth;
 
 import lombok.Builder;
 import lombok.Data;
