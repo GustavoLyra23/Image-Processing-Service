@@ -2,15 +2,19 @@ package org.gustavolyra.image_process_service.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gustavolyra.image_process_service.exceptions.DbConstraintException;
+import org.gustavolyra.image_process_service.exceptions.ResourceNotFoundException;
 import org.gustavolyra.image_process_service.exceptions.UnathorizedException;
 import org.gustavolyra.image_process_service.models.dto.auth.AuthResponseDto;
 import org.gustavolyra.image_process_service.models.dto.auth.UserDataDto;
 import org.gustavolyra.image_process_service.models.entities.User;
+import org.gustavolyra.image_process_service.repositories.RoleRepository;
 import org.gustavolyra.image_process_service.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -19,11 +23,14 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RoleRepository roleRepository;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.roleRepository = roleRepository;
     }
 
     @Transactional
@@ -52,6 +59,10 @@ public class AuthService {
             userRepository.save(User.builder()
                     .email(userDataDto.getUsername())
                     .password(passwordEncoder.encode(userDataDto.getPassword()))
+                    .roles(Set.of(roleRepository.findByName("ROLE_USER").orElseThrow(() -> {
+                        log.error("Role not found");
+                        return new ResourceNotFoundException("Role not found");
+                    })))
                     .build());
             log.info("User {} registered with success", userDataDto.getUsername());
         }

@@ -4,6 +4,7 @@ import org.gustavolyra.image_process_service.exceptions.ReverseProxyException;
 import org.gustavolyra.image_process_service.models.dto.ImageDto;
 import org.gustavolyra.image_process_service.models.entities.Image;
 import org.gustavolyra.image_process_service.repositories.ImageRepository;
+import org.gustavolyra.image_process_service.utils.AuthUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,10 +25,13 @@ public class ImageService {
     @Transactional
     public ImageDto uploadImage(MultipartFile file) {
         try {
+            var user = AuthUtil.getCurrentUser();
             var url = awsS3Service.sendFileToS3(file);
             var image = imageRepository.save(Image.builder()
                     .url(url)
+                    .user(user)
                     .build());
+
             return new ImageDto(image);
         } catch (IOException e) {
             throw new ReverseProxyException("Error uploading image");
