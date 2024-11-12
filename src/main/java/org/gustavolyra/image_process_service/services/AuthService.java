@@ -7,6 +7,7 @@ import org.gustavolyra.image_process_service.models.dto.AuthResponseDto;
 import org.gustavolyra.image_process_service.models.dto.UserDataDto;
 import org.gustavolyra.image_process_service.models.entities.User;
 import org.gustavolyra.image_process_service.repositories.UserRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,7 @@ public class AuthService {
     public AuthResponseDto login(UserDataDto userDataDto) {
         log.info("Entering in login method...");
         User user = userRepository.findByEmail(userDataDto.getUsername()).orElseThrow(() ->
-                new RuntimeException("User not found"));
+                new UsernameNotFoundException("User not found"));
         if (passwordEncoder.matches(userDataDto.getPassword(), user.getPassword())) {
             String accessToken = jwtService.GenerateToken(user.getUsername());
             log.info("Token generated with success for user {}", user.getUsername());
