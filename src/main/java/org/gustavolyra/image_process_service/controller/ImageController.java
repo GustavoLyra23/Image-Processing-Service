@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/v1/image")
+@RequestMapping("/v1/images")
 public class ImageController {
 
     private final ImageService imageService;

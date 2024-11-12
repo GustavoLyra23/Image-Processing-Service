@@ -2,6 +2,7 @@ package org.gustavolyra.image_process_service.controller.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.gustavolyra.image_process_service.exceptions.DbConstraintException;
+import org.gustavolyra.image_process_service.exceptions.ReverseProxyException;
 import org.gustavolyra.image_process_service.exceptions.UnathorizedException;
 import org.gustavolyra.image_process_service.models.dto.error.ErrorDto;
 import org.springframework.http.HttpStatus;
@@ -35,5 +36,14 @@ public class ControllerExceptionHandler {
         var err = new ErrorDto(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
     }
+
+    @ExceptionHandler(ReverseProxyException.class)
+    public ResponseEntity<ErrorDto> handleReverseProxyException(ReverseProxyException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_GATEWAY;
+        var err = new ErrorDto(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+
 
 }
