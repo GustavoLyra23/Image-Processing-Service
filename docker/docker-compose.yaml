@@ -21,6 +21,18 @@ services:
     networks:
       - spring_boot_network
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: gustavo
+      RABBITMQ_DEFAULT_PASS: 123456
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - spring_boot_network
+
 networks:
   spring_boot_network:
     driver: bridge

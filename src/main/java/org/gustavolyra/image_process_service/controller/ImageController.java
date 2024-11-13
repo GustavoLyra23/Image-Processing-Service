@@ -1,13 +1,15 @@
 package org.gustavolyra.image_process_service.controller;
 
 import org.gustavolyra.image_process_service.models.dto.ImageDto;
+import org.gustavolyra.image_process_service.models.dto.transformations.TransformationsDto;
 import org.gustavolyra.image_process_service.services.ImageService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/images")
@@ -19,10 +21,21 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-
     @PostMapping()
     public ResponseEntity<ImageDto> uploadImage(@RequestParam("file") MultipartFile file) {
         var image = imageService.uploadImage(file);
         return ResponseEntity.ok(image);
+    }
+
+    @GetMapping()
+    public ResponseEntity<Page<ImageDto>> getImages(Pageable pageable) {
+        var images = imageService.getImages(pageable);
+        return ResponseEntity.ok(images);
+    }
+
+    @PostMapping("/{id}/transform")
+    public ResponseEntity<String> transformImage(@PathVariable String id, @RequestBody TransformationsDto transformations) {
+        imageService.transformImage(UUID.fromString(id), transformations);
+        return ResponseEntity.noContent().build();
     }
 }
