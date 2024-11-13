@@ -2,10 +2,10 @@ package org.gustavolyra.image_process_service.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gustavolyra.image_process_service.exceptions.DbConstraintException;
-import org.gustavolyra.image_process_service.exceptions.ResourceNotFoundException;
 import org.gustavolyra.image_process_service.exceptions.UnathorizedException;
 import org.gustavolyra.image_process_service.models.dto.auth.AuthResponseDto;
 import org.gustavolyra.image_process_service.models.dto.auth.UserDataDto;
+import org.gustavolyra.image_process_service.models.entities.Role;
 import org.gustavolyra.image_process_service.models.entities.User;
 import org.gustavolyra.image_process_service.repositories.RoleRepository;
 import org.gustavolyra.image_process_service.repositories.UserRepository;
@@ -56,13 +56,19 @@ public class AuthService {
             log.error("User already exists");
             throw new DbConstraintException("User already exists");
         } else {
+
+            var role = roleRepository.findByName("USER").orElseGet(() -> {
+                log.info("Role not found, creating new role");
+                var newRole = roleRepository.save(Role.builder()
+                        .name("ROLE_USER")
+                        .build());
+                log.info("Role created with success");
+                return newRole;
+            });
             userRepository.save(User.builder()
                     .email(userDataDto.getUsername())
                     .password(passwordEncoder.encode(userDataDto.getPassword()))
-                    .roles(Set.of(roleRepository.findByName("ROLE_USER").orElseThrow(() -> {
-                        log.error("Role not found");
-                        return new ResourceNotFoundException("Role not found");
-                    })))
+                    .roles(Set.of(role))
                     .build());
             log.info("User {} registered with success", userDataDto.getUsername());
         }

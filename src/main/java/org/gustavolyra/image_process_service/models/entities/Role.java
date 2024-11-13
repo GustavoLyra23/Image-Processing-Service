@@ -1,14 +1,12 @@
 package org.gustavolyra.image_process_service.models.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Objects;
 
+@Builder
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor

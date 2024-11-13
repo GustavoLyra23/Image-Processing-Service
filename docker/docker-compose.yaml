@@ -9,6 +9,18 @@ services:
     networks:
       - spring_boot_network
 
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: image
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5432:5432"
+    networks:
+      - spring_boot_network
+
 networks:
   spring_boot_network:
     driver: bridge
