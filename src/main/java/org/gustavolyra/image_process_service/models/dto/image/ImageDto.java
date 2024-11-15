@@ -1,4 +1,4 @@
-package org.gustavolyra.image_process_service.models.dto;
+package org.gustavolyra.image_process_service.models.dto.image;
 
 import lombok.Data;
 import org.gustavolyra.image_process_service.models.entities.Image;

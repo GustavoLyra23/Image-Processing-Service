@@ -6,7 +6,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import lombok.extern.slf4j.Slf4j;
 import org.gustavolyra.image_process_service.config.S3Config;
-import org.gustavolyra.image_process_service.models.dto.ImageDataDto;
+import org.gustavolyra.image_process_service.models.dto.image.ImageDataDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

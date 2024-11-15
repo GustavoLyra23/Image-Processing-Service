@@ -1,6 +1,6 @@
 package org.gustavolyra.image_process_service.controller;
 
-import org.gustavolyra.image_process_service.models.dto.ImageDto;
+import org.gustavolyra.image_process_service.models.dto.image.ImageDto;
 import org.gustavolyra.image_process_service.models.dto.transformations.TransformationsDto;
 import org.gustavolyra.image_process_service.services.ImageService;
 import org.springframework.data.domain.Page;

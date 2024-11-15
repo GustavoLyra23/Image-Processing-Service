@@ -2,6 +2,7 @@ package org.gustavolyra.image_process_service.controller.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.gustavolyra.image_process_service.exceptions.DbConstraintException;
+import org.gustavolyra.image_process_service.exceptions.ResourceNotFoundException;
 import org.gustavolyra.image_process_service.exceptions.ReverseProxyException;
 import org.gustavolyra.image_process_service.exceptions.UnathorizedException;
 import org.gustavolyra.image_process_service.models.dto.error.ErrorDto;
@@ -44,6 +45,11 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
-
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorDto> handleResourceNotFoundException(ResourceNotFoundException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        var err = new ErrorDto(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
 
 }

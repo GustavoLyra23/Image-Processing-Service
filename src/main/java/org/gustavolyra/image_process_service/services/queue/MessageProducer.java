@@ -1,7 +1,7 @@
 package org.gustavolyra.image_process_service.services.queue;
 
 import org.gustavolyra.image_process_service.config.RabbitMQConfig;
-import org.gustavolyra.image_process_service.models.dto.ImageDataDto;
+import org.gustavolyra.image_process_service.models.dto.image.ImageDataDto;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 

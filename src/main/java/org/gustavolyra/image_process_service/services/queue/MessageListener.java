@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gustavolyra.image_process_service.config.RabbitMQConfig;
 import org.gustavolyra.image_process_service.exceptions.ResourceNotFoundException;
 import org.gustavolyra.image_process_service.exceptions.ReverseProxyException;
-import org.gustavolyra.image_process_service.models.dto.ImageDataDto;
+import org.gustavolyra.image_process_service.models.dto.image.ImageDataDto;
 import org.gustavolyra.image_process_service.models.entities.Image;
 import org.gustavolyra.image_process_service.repositories.ImageRepository;
 import org.gustavolyra.image_process_service.repositories.UserRepository;
