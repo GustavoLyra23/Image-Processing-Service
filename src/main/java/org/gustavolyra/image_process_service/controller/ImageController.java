@@ -22,9 +22,9 @@ public class ImageController {
     }
 
     @PostMapping()
-    public ResponseEntity<ImageDto> uploadImage(@RequestParam("file") MultipartFile file) {
-        var image = imageService.uploadImage(file);
-        return ResponseEntity.ok(image);
+    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+        var msg = imageService.uploadImage(file);
+        return ResponseEntity.ok(msg);
     }
 
     @GetMapping()

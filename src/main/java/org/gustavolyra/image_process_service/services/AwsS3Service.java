@@ -6,14 +6,11 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import lombok.extern.slf4j.Slf4j;
 import org.gustavolyra.image_process_service.config.S3Config;
+import org.gustavolyra.image_process_service.models.dto.ImageDataDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,13 +28,16 @@ public class AwsS3Service {
         this.amazonS3 = amazonS3;
     }
 
-    public String sendFileToS3(MultipartFile file) throws IOException {
+    public String sendFileToS3(ImageDataDto message) throws IOException {
         log.info("Adding file to bucket");
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String fileName = UUID.randomUUID() + "_" + message.getFileName();
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(file.getContentType());
+        metadata.setContentType(message.getContentType());
         metadata.setContentDisposition("inline");
-        amazonS3.amazonS3().putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
+        metadata.setContentLength(message.getFileData().length);
+
+        InputStream inputStream = new ByteArrayInputStream(message.getFileData());
+        amazonS3.amazonS3().putObject(new PutObjectRequest(bucketName, fileName, inputStream, metadata));
         return amazonS3.amazonS3().getUrl(bucketName, fileName).toString();
     }
 
@@ -49,7 +49,4 @@ public class AwsS3Service {
             return reader.lines().collect(Collectors.joining("\n")).getBytes();
         }
     }
-
-
-
 }
