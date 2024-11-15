@@ -5,10 +5,9 @@ import lombok.Data;
 @Data
 public class TransformationsDto {
 
-    private Double rotate;
+    private int rotate;
     private String format;
     private Crop crop;
     private Resize resize;
     private Filters filters;
-
 }

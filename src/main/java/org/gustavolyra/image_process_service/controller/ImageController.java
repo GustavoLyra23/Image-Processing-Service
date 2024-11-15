@@ -5,6 +5,8 @@ import org.gustavolyra.image_process_service.models.dto.transformations.Transfor
 import org.gustavolyra.image_process_service.services.ImageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,8 +36,10 @@ public class ImageController {
     }
 
     @PostMapping("/{id}/transform")
-    public ResponseEntity<String> transformImage(@PathVariable String id, @RequestBody TransformationsDto transformations) {
-        imageService.transformImage(UUID.fromString(id), transformations);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<byte[]> transformImage(@PathVariable String id, @RequestBody TransformationsDto transformations) {
+        byte[] image = imageService.transformImage(UUID.fromString(id), transformations);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "image/png");
+        return new ResponseEntity<>(image, headers, HttpStatus.OK);
     }
 }

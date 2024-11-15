@@ -10,9 +10,10 @@ import org.gustavolyra.image_process_service.models.dto.ImageDataDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -44,9 +45,8 @@ public class AwsS3Service {
     public byte[] fetchFileFromS3(String fileName) throws IOException {
         log.info("Fetching file from bucket");
         S3Object s3Object = amazonS3.amazonS3().getObject(new GetObjectRequest(bucketName, fileName));
-        try (InputStream inputStream = s3Object.getObjectContent();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            return reader.lines().collect(Collectors.joining("\n")).getBytes();
+        try (InputStream inputStream = s3Object.getObjectContent()) {
+            return inputStream.readAllBytes();
         }
     }
 }
