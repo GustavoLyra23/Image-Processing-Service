@@ -36,8 +36,10 @@ public class AuthService {
     @Transactional
     public AuthResponseDto login(UserDataDto userDataDto) {
         log.info("Entering in login method...");
-        User user = userRepository.findByEmail(userDataDto.getUsername()).orElseThrow(() ->
-                new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDataDto.getUsername()).orElseThrow(() -> {
+            log.error("User not found email: {}", userDataDto.getUsername());
+            return new UsernameNotFoundException("User not found");
+        });
         if (passwordEncoder.matches(userDataDto.getPassword(), user.getPassword())) {
             String accessToken = jwtService.GenerateToken(user.getUsername());
             log.info("Token generated with success for user {}", user.getUsername());
@@ -56,7 +58,6 @@ public class AuthService {
             log.error("User already exists");
             throw new DbConstraintException("User already exists");
         } else {
-
             var role = roleRepository.findByName("USER").orElseGet(() -> {
                 log.info("Role not found, creating new role");
                 var newRole = roleRepository.save(Role.builder()
