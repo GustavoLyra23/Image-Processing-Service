@@ -2,6 +2,7 @@ package org.gustavolyra.image_process_service.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gustavolyra.image_process_service.exceptions.ImageTransformationException;
+import org.gustavolyra.image_process_service.exceptions.RateLimitException;
 import org.gustavolyra.image_process_service.exceptions.ResourceNotFoundException;
 import org.gustavolyra.image_process_service.exceptions.ReverseProxyException;
 import org.gustavolyra.image_process_service.models.dto.image.ImageDataDto;
@@ -35,11 +36,13 @@ public class ImageService {
     private final AwsS3Service awsS3Service;
     private final ImageRepository imageRepository;
     private final MessageProducer messageProducer;
+    private final RateLimitService rateLimitService;
 
-    public ImageService(AwsS3Service awsS3Service, ImageRepository imageRepository, MessageProducer messageProducer) {
+    public ImageService(AwsS3Service awsS3Service, ImageRepository imageRepository, MessageProducer messageProducer, RateLimitService rateLimitService) {
         this.awsS3Service = awsS3Service;
         this.imageRepository = imageRepository;
         this.messageProducer = messageProducer;
+        this.rateLimitService = rateLimitService;
     }
 
 
@@ -68,10 +71,16 @@ public class ImageService {
 
     @Transactional
     public byte[] transformImage(UUID id, TransformationsDto transformations) {
+        var user = AuthUtil.getCurrentUser();
+        if (!rateLimitService.isAllowed(user.getId().toString())) {
+            log.warn("Rate limit exceeded for user: {}", user.getId());
+            throw new RateLimitException("Rate limit exceeded. Please wait before trying again.");
+        }
+
         try {
             log.info("transforming image");
-            var user = AuthUtil.getCurrentUser();
-            var image = imageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+            var image = imageRepository.findById(id).orElseThrow(() ->
+                    new ResourceNotFoundException("Image not found"));
             URI uri = URI.create(image.getUrl());
             String key = uri.getPath().substring(1);
             byte[] s3File = awsS3Service.fetchFileFromS3(key);
