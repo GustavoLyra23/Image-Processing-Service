@@ -15,6 +15,8 @@ import org.gustavolyra.image_process_service.repositories.ImageRepository;
 import org.gustavolyra.image_process_service.services.queue.MessageProducer;
 import org.gustavolyra.image_process_service.utils.AuthUtil;
 import org.imgscalr.Scalr;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,18 +39,20 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final MessageProducer messageProducer;
     private final RateLimitService rateLimitService;
+    private final ImageService self;
 
-    public ImageService(AwsS3Service awsS3Service, ImageRepository imageRepository, MessageProducer messageProducer, RateLimitService rateLimitService) {
+
+    public ImageService(AwsS3Service awsS3Service, ImageRepository imageRepository, MessageProducer messageProducer, RateLimitService rateLimitService, @Lazy ImageService self) {
         this.awsS3Service = awsS3Service;
         this.imageRepository = imageRepository;
         this.messageProducer = messageProducer;
         this.rateLimitService = rateLimitService;
+        this.self = self;
     }
-
 
     public String uploadImage(MultipartFile file) {
         try {
-            log.info("sending file to queue");
+            log.info("Sending file to queue");
             var user = AuthUtil.getCurrentUser();
             messageProducer.sendMessage(ImageDataDto.builder()
                     .contentType(file.getContentType())
@@ -58,9 +62,9 @@ public class ImageService {
                     .build());
             return "Sent file to AWS... please wait for processing";
         } catch (IOException e) {
+            log.error("Error uploading image", e);
             throw new InternalError("Error uploading image");
         }
-
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +75,7 @@ public class ImageService {
 
     @Transactional
     public byte[] transformImage(UUID id, TransformationsDto transformations) {
+        log.info("Calling transformImage method for id: {} with transforms: {}", id, transformations);
         var user = AuthUtil.getCurrentUser();
         if (!rateLimitService.isAllowed(user.getId().toString())) {
             log.warn("Rate limit exceeded for user: {}", user.getId());
@@ -78,17 +83,22 @@ public class ImageService {
         }
 
         try {
-            log.info("transforming image");
+            log.info("Transforming image");
             var image = imageRepository.findById(id).orElseThrow(() ->
                     new ResourceNotFoundException("Image not found"));
             URI uri = URI.create(image.getUrl());
             String key = uri.getPath().substring(1);
             byte[] s3File = awsS3Service.fetchFileFromS3(key);
-            return applyTransformations(s3File, transformations);
+            return self.applyTransformationsCached(s3File, transformations, user.getId().toString());
         } catch (IOException e) {
             log.error("Error fetching image", e);
             throw new ReverseProxyException("Error fetching image from S3");
         }
+    }
+
+    @Cacheable(value = "transformations", key = "{#userId, #s3File.hashCode(), #transformations}")
+    public byte[] applyTransformationsCached(byte[] s3File, TransformationsDto transformations, String userId) {
+        return applyTransformations(s3File, transformations);
     }
 
     public byte[] applyTransformations(byte[] image, TransformationsDto transformations) {
